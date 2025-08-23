@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>N.V.C.A - Vote Tags Admin</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at 20% 80%, rgba(30, 30, 30, 0.8) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(50, 50, 50, 0.6) 0%, transparent 50%),
+                  linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      color: #c0c0c0;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Glassmorphic Header */
+    header {
+      padding: 25px;
+      background: rgba(17, 17, 17, 0.7);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(192, 192, 192, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-title {
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      background: linear-gradient(45deg, #ffffff, #c0c0c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .admin-badge {
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: #000;
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .user-info {
+      background: rgba(30, 30, 30, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(192, 192, 192, 0.3);
+      border-radius: 20px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logout-btn {
+      background: linear-gradient(45deg, #dc3545, #ff4757);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Navigation */
+    .nav-container {
+      background: rgba(17, 17, 17, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(192, 192, 192, 0.2);
+      padding: 15px;
+      text-align: center;
+    }
+
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: #c0c0c0;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      background: rgba(30, 30, 30, 0.5);
+      border: 1px solid rgba(192, 192, 192, 0.2);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(192, 192, 192, 0.2);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 40px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .page-header h1 {
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, #ffffff, #c0c0c0, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-subtitle {
+      font-size: 1.2rem;
+      color: #e0e0e0;
+    }
+
+    /* Admin Container */
+    .admin-container {
+      background: rgba(17, 17, 17, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(192, 192, 192, 0.3);
+      border-radius: 25px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .admin-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c0c0c0, transparent);
+      animation: shimmer 4s infinite;
+    }
+
+    .create-tag-btn {
+      background: linear-gradient(45deg, #28a745, #34d058);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+      margin-bottom: 30px;
+    }
+
+    .create-tag-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(40, 167, 69, 0.4);
+    }
+
+    .create-tag-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .generated-tag {
+      background: rgba(30, 30, 30, 0.8);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 2px solid rgba(40, 167, 69, 0.5);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 30px;
+      display: none;
+    }
+
+    .tag-display {
+      font-size: 3rem;
+      font-weight: bold;
+      letter-spacing: 8px;
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(45deg, #4ade80, #22c55e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tag-info {
+      color: #c0c0c0;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    .copy-btn {
+      background: rgba(192, 192, 192, 0.2);
+      color: #c0c0c0;
+      border: 1px solid rgba(192, 192, 192, 0.3);
+      padding: 10px 20px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .copy-btn:hover {
+      background: rgba(192, 192, 192, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Messages */
+    .message {
+      padding: 15px 25px;
+      border-radius: 15px;
+      margin: 20px 0;
+      font-weight: 500;
+      display: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .message.error {
+      background: rgba(220, 53, 69, 0.2);
+      border: 1px solid rgba(220, 53, 69, 0.5);
+      color: #ff6b6b;
+    }
+
+    .message.success {
+      background: rgba(40, 167, 69, 0.2);
+      border: 1px solid rgba(40, 167, 69, 0.5);
+      color: #4ade80;
+    }
+
+    /* Manage Tags Section */
+    .tags-section {
+      margin-top: 60px;
+    }
+
+    .section-header {
+      background: rgba(17, 17, 17, 0.6);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(192, 192, 192, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .section-header h2 {
+      font-size: 2rem;
+      background: linear-gradient(45deg, #ffffff, #c0c0c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tag-search {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .tag-search input {
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid rgba(192, 192, 192, 0.3);
+      border-radius: 15px;
+      padding: 12px 20px;
+      color: #ffffff;
+      font-size: 1rem;
+      min-width: 200px;
+      text-transform: uppercase;
+    }
+
+    .tag-search button {
+      background: linear-gradient(45deg, #007bff, #0056b3);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .tag-search button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+    }
+
+    .tag-details {
+      background: rgba(17, 17, 17, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(192, 192, 192, 0.3);
+      border-radius: 25px;
+      padding: 40px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .tag-details::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c0c0c0, transparent);
+      animation: shimmer 4s infinite;
+    }
+
+    .tag-code {
+      font-size: 2.5rem;
+      font-weight: bold;
+      letter-spacing: 8px;
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(45deg, #4ade80, #22c55e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tag-status {
+      margin-bottom: 20px;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-weight: bold;
+    }
+
+    .tag-status.available {
+      background: rgba(40, 167, 69, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .tag-status.partial {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .tag-status.used {
+      background: rgba(220, 53, 69, 0.2);
+      color: #ff6b6b;
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .tag-usage-info {
+      color: #c0c0c0;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .delete-tag-btn {
+      background: linear-gradient(45deg, #dc3545, #c82333);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .delete-tag-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Batch Tags Link */
+    .batch-tags-link {
+      margin-top: 40px;
+    }
+
+    .batch-tags-link a {
+      background: linear-gradient(45deg, #6f42c1, #5a32a3);
+      color: white;
+      text-decoration: none;
+      padding: 15px 40px;
+      border-radius: 25px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(111, 66, 193, 0.3);
+      display: inline-block;
+    }
+
+    .batch-tags-link a:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(111, 66, 193, 0.4);
+    }
+
+    /* Footer */
+    footer {
+      padding: 30px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-top: 1px solid rgba(192, 192, 192, 0.3);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      margin-top: auto;
+    }
+
+    footer a {
+      color: #c0c0c0;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    footer a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(45deg, #c0c0c0, #ffffff);
+      transition: width 0.3s ease;
+    }
+
+    footer a:hover::after {
+      width: 100%;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .fade-in { animation: fadeIn 1s ease forwards; }
+    .slide-up { animation: slideUp 0.8s ease forwards; }
+
+    .success-pulse {
+      animation: pulse 0.6s ease;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 1.5rem;
+      }
+      
+      .user-info {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+      }
+      
+      .admin-container {
+        padding: 25px;
+        margin: 20px 10px;
+      }
+      
+      .page-header h1 {
+        font-size: 2rem;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .tag-display {
+        font-size: 2rem;
+        letter-spacing: 4px;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, collection, serverTimestamp, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnA5VAidJ20mtaoikC4p0oJyq6Ji2h-qU",
+      authDomain: "coding-squad-249f7.firebaseapp.com",
+      databaseURL: "https://coding-squad-249f7-default-rtdb.firebaseio.com",
+      projectId: "coding-squad-249f7",
+      storageBucket: "coding-squad-249f7.appspot.com",
+      messagingSenderId: "385893863935",
+      appId: "1:385893863935:web:e7b73f4deb14eef6d197ca"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Global variables
+    window.auth = auth;
+    window.db = db;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.setDoc = setDoc;
+    window.collection = collection;
+    window.serverTimestamp = serverTimestamp;
+    window.deleteDoc = deleteDoc;
+  </script>
+</head>
+<body>
+  <!-- Auth/Role Check Overlay -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-message">
+      <h2>Alert</h2>
+      <p id="authMessage">Checking permissions from server...</p>
+      <a href="index.html" class="auth-link" id="authLink" style="display: none;">Go to Home</a>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="fade-in">
+    <div class="header-left">
+      <h1 class="header-title">Admin Panel</h1>
+      <span class="admin-badge">Vote Tags</span>
+    </div>
+    <div class="user-info">
+      <span id="userEmail">Loading...</span>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="nav-container fade-in">
+    <div class="nav-links">
+      <a href="vote.html" class="nav-link">Vote Page</a>
+      <a href="male.html" class="nav-link">Male Admin</a>
+      <a href="female.html" class="nav-link">Female Admin</a>
+      <a href="tag.html" class="nav-link active">Vote Tags</a>
+      <a href="index.html" class="nav-link">Home</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+      <h1>Vote Tags Management</h1>
+      <p class="page-subtitle">Generate secure vote tags for venue access control</p>
+    </div>
+
+    <!-- Generate Tag Container -->
+    <div class="admin-container slide-up">
+      <h2 style="margin-bottom: 30px; color: #ffffff; font-size: 1.8rem;">Generate Vote Tag</h2>
+      
+      <!-- Messages -->
+      <div id="message" class="message"></div>
+      
+      <button class="create-tag-btn" onclick="createVoteTag()" id="createBtn">
+        Create Tag
+      </button>
+
+      <!-- Generated Tag Display -->
+      <div id="generatedTag" class="generated-tag">
+        <div class="tag-display" id="tagCode"></div>
+        <div class="tag-info">
+          Tag created successfully! <br>
+          This tag allows 2 votes (one per category)
+        </div>
+        <button class="copy-btn" onclick="copyTag()">
+          Copy Tag
+        </button>
+      </div>
+    </div>
+
+    <!-- Manage Tags Section -->
+    <div class="tags-section slide-up">
+      <div class="section-header">
+        <h2>Manage Tags</h2>
+        <p style="color: #888; margin-top: 10px;">Search and manage individual vote tags</p>
+      </div>
+      
+      <!-- Tag Search -->
+      <div class="tag-search">
+        <input 
+          type="text" 
+          id="tagSearchInput" 
+          placeholder="Enter tag code (e.g., ABC123)" 
+          maxlength="6"
+        />
+        <button onclick="searchTag()" id="searchBtn">
+          Search Tag
+        </button>
+      </div>
+
+      <!-- Tag Details Display -->
+      <div id="tagDetails" class="tag-details">
+        <div id="tagDetailsContent"></div>
+      </div>
+    </div>
+
+    <!-- Batch Tags Link -->
+    <div class="batch-tags-link slide-up">
+      <h2 style="margin-bottom: 20px; color: #ffffff; font-size: 1.8rem;">Batch Operations</h2>
+      <p style="color: #c0c0c0; margin-bottom: 25px;">Create multiple tags for printing</p>
+      <a href="batch-tag.html">
+        Create Batch Tags
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="fade-in">
+    <p>Developed by <a href="https://drexx.vercel.app" target="_blank">Drexx Codes</a></p>
+  </footer>
+
+  <script>
+    let currentUser = null;
+
+    // Check authentication and admin role
+    window.addEventListener('load', () => {
+      if (window.onAuthStateChanged) {
+        window.onAuthStateChanged(window.auth, async (user) => {
+          if (user) {
+            currentUser = user;
+            document.getElementById('userEmail').textContent = user.email;
+            
+            // Check if user is admin
+            const isAdmin = await checkAdminRole(user.uid);
+            if (isAdmin) {
+              document.getElementById('authOverlay').style.display = 'none';
+            } else {
+              showAccessDenied();
+            }
+          } else {
+            showLoginRequired();
+          }
+        });
+      }
+    });
+
+    // Check admin role
+    async function checkAdminRole(uid) {
+      try {
+        const userDocRef = window.doc(window.db, 'users', uid);
+        const userDoc = await window.getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          return userData.role === 'admin';
+        }
+        return false;
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+        return false;
+      }
+    }
+
+    // Show access denied message
+    function showAccessDenied() {
+      document.getElementById('authMessage').textContent = 'Access denied. Admin privileges required.';
+      document.getElementById('authLink').style.display = 'inline-block';
+      document.getElementById('authLink').textContent = 'Go to Home';
+      document.getElementById('authLink').href = 'index.html';
+    }
+
+    // Show login required message
+    function showLoginRequired() {
+      document.getElementById('authMessage').textContent = 'Please log in to access this page.';
+      document.getElementById('authLink').style.display = 'inline-block';
+      document.getElementById('authLink').textContent = 'Go to Login';
+      document.getElementById('authLink').href = 'auth.html';
+    }
+
+    // Generate random 6-character tag
+    function generateRandomTag() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    // Create vote tag
+    async function createVoteTag() {
+      const createBtn = document.getElementById('createBtn');
+      const generatedTagDiv = document.getElementById('generatedTag');
+      
+      // Disable button
+      createBtn.disabled = true;
+      createBtn.textContent = 'Creating...';
+      
+      try {
+        let tagCode;
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        // Generate unique tag code
+        do {
+          tagCode = generateRandomTag();
+          attempts++;
+          
+          // Check if tag already exists
+          const existingTag = await window.getDoc(window.doc(window.db, 'tags', tagCode));
+          if (!existingTag.exists()) {
+            break;
+          }
+          
+          if (attempts >= maxAttempts) {
+            throw new Error('Unable to generate unique tag after multiple attempts');
+          }
+        } while (attempts < maxAttempts);
+        
+        // Create tag document
+        await window.setDoc(window.doc(window.db, 'tags', tagCode), {
+          createdAt: window.serverTimestamp(),
+          createdBy: currentUser.uid,
+          token: 2,
+          usedBy: null,
+          status: 'available'
+        });
+        
+        // Display generated tag
+        document.getElementById('tagCode').textContent = tagCode;
+        generatedTagDiv.style.display = 'block';
+        generatedTagDiv.scrollIntoView({ behavior: 'smooth' });
+        
+        showMessage('Vote tag created successfully!', 'success');
+        
+        // Add success animation
+        document.querySelector('.admin-container').classList.add('success-pulse');
+        setTimeout(() => {
+          document.querySelector('.admin-container').classList.remove('success-pulse');
+        }, 600);
+        
+      } catch (error) {
+        console.error('Error creating vote tag:', error);
+        showMessage('Error creating vote tag. Please try again.', 'error');
+      } finally {
+        // Re-enable button
+        createBtn.disabled = false;
+        createBtn.textContent = 'Create Tag';
+      }
+    }
+
+    // Copy tag to clipboard
+    async function copyTag() {
+      const tagCode = document.getElementById('tagCode').textContent;
+      
+      try {
+        await navigator.clipboard.writeText(tagCode);
+        
+        const copyBtn = document.querySelector('.copy-btn');
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        copyBtn.style.background = 'rgba(40, 167, 69, 0.3)';
+        copyBtn.style.color = '#4ade80';
+        
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.background = 'rgba(192, 192, 192, 0.2)';
+          copyBtn.style.color = '#c0c0c0';
+        }, 2000);
+        
+      } catch (error) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = tagCode;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        showMessage('Tag copied to clipboard!', 'success');
+      }
+    }
+
+    // Search for specific tag
+    async function searchTag() {
+      const tagInput = document.getElementById('tagSearchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const tagDetailsDiv = document.getElementById('tagDetails');
+      const tagDetailsContent = document.getElementById('tagDetailsContent');
+      
+      const tagCode = tagInput.value.trim().toUpperCase();
+      
+      if (!tagCode) {
+        showMessage('Please enter a tag code', 'error');
+        return;
+      }
+      
+      if (tagCode.length !== 6) {
+        showMessage('Tag code must be 6 characters', 'error');
+        return;
+      }
+      
+      // Disable search button
+      searchBtn.disabled = true;
+      searchBtn.textContent = 'Searching...';
+      
+      try {
+        const tagDoc = await window.getDoc(window.doc(window.db, 'tags', tagCode));
+        
+        if (!tagDoc.exists()) {
+          showMessage('Tag not found', 'error');
+          tagDetailsDiv.style.display = 'none';
+          return;
+        }
+        
+        const tagData = tagDoc.data();
+        const tokens = tagData.token || 0;
+        
+        let statusClass = 'available';
+        let statusText = 'Available (2 votes)';
+        let usageInfo = 'Not used yet';
+        
+        if (tokens === 1) {
+          statusClass = 'partial';
+          statusText = 'Partially Used (1 vote left)';
+          usageInfo = `Used by: ${tagData.usedBy || 'Unknown'}`;
+        } else if (tokens === 0) {
+          statusClass = 'used';
+          statusText = 'Fully Used';
+          usageInfo = `Used by: ${tagData.usedBy || 'Unknown'}`;
+        }
+        
+        const createdDate = tagData.createdAt ? 
+          new Date(tagData.createdAt.toDate()).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : 'Unknown';
+        
+        tagDetailsContent.innerHTML = `
+          <div style="text-align: center;">
+            <div class="tag-code">${tagCode}</div>
+            <div class="tag-status ${statusClass}">${statusText}</div>
+            <div class="tag-usage-info">
+              <strong>Created:</strong> ${createdDate}<br>
+              <strong>Usage:</strong> ${usageInfo}<br>
+              <strong>Tokens Remaining:</strong> ${tokens}
+            </div>
+            <button onclick="deleteTag('${tagCode}')" class="delete-tag-btn">
+              Delete Tag
+            </button>
+          </div>
+        `;
+        
+        tagDetailsDiv.style.display = 'block';
+        tagDetailsDiv.scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error('Error searching tag:', error);
+        showMessage('Error searching tag. Please try again.', 'error');
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = 'Search Tag';
+      }
+    }
+    
+    // Delete tag with confirmation
+    async function deleteTag(tagCode) {
+      const confirmed = confirm(`The tag ${tagCode} will be removed from the NVCA Database. Proceed?`);
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      try {
+        await window.deleteDoc(window.doc(window.db, 'tags', tagCode));
+        showMessage('Tag deleted successfully', 'success');
+        
+        // Hide tag details
+        document.getElementById('tagDetails').style.display = 'none';
+        
+        // Clear search input
+        document.getElementById('tagSearchInput').value = '';
+        
+      } catch (error) {
+        console.error('Error deleting tag:', error);
+        showMessage('Error deleting tag. Please try again.', 'error');
+      }
+    }
+    
+    // Format tag input to uppercase
+    document.addEventListener('DOMContentLoaded', () => {
+      const tagInput = document.getElementById('tagSearchInput');
+      if (tagInput) {
+        tagInput.addEventListener('input', (e) => {
+          e.target.value = e.target.value.toUpperCase();
+        });
+        
+        tagInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            searchTag();
+          }
+        });
+      }
+    });
+
+    // Utility functions
+    function showMessage(text, type) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+      messageEl.style.display = 'block';
+      
+      // Auto-hide messages
+      setTimeout(() => {
+        messageEl.style.display = 'none';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
